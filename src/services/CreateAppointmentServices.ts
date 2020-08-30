@@ -10,12 +10,12 @@ interface Request {
 }
 
 class CreateAppointmentService {
-  public async execute({ date, provider }: Request): Promise<Appointment> {
-    const appointmentsRepository = getCustomRepository(AppointmentsRepository);
+  private appointmentsRepository = getCustomRepository(AppointmentsRepository);
 
+  public async execute({ date, provider }: Request): Promise<Appointment> {
     const appointmentDate = startOfHour(date);
 
-    const findAppointmentInSameDate = appointmentsRepository.findByDate(
+    const findAppointmentInSameDate = await this.appointmentsRepository.findByDate(
       appointmentDate,
     );
 
@@ -23,12 +23,12 @@ class CreateAppointmentService {
       throw Error('This appointment is already booked');
     }
 
-    const appointment = appointmentsRepository.create({
+    const appointment = this.appointmentsRepository.create({
       provider,
       date: appointmentDate,
     });
 
-    await appointmentsRepository.save(appointment);
+    await this.appointmentsRepository.save(appointment);
 
     return appointment;
   }
